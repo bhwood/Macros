@@ -1,0 +1,64 @@
+Sub CreateNewFolderAndSaveCopy()
+    Dim basePath As String
+    Dim folderName As String
+    Dim newFolderPath As String
+    Dim newWorkbookPath As String
+    Dim creditorLetterPath As String
+    Dim mainDataSheet As Worksheet
+    
+    ' Get the base path of the current workbook
+    basePath = ThisWorkbook.Path
+    
+    ' Retrieve the values from cells B2 and B16
+    Set mainDataSheet = ThisWorkbook.Sheets("Main Data")
+    folderName = mainDataSheet.Range("B2").Value & " " & mainDataSheet.Range("B16").Value
+    
+    ' Set the value of cell B20 on "Main Data" sheet to "Yes"
+    mainDataSheet.Range("B20").Value = "Yes"
+    
+    ' Construct the full path for the new folder
+    newFolderPath = basePath & "\" & folderName
+    
+    ' Check if folder already exists, if not, create it
+    If Dir(newFolderPath, vbDirectory) = "" Then
+        MkDir newFolderPath
+        MsgBox "Folder '" & folderName & "' created successfully."
+    Else
+        MsgBox "Folder '" & folderName & "' already exists."
+        Exit Sub
+    End If
+    
+    ' Save a copy of the current workbook to the new folder with filename "Master Form"
+    newWorkbookPath = newFolderPath & "\Master Form.xlsm" '
+    ThisWorkbook.SaveCopyAs newWorkbookPath
+    
+    ' Open the newly saved workbook
+    Dim newWorkbook As Workbook
+    Set newWorkbook = Workbooks.Open(newWorkbookPath)
+    
+    ' Copy the "Creditor First Letter.docx" to the new folder
+    creditorLetterPath = basePath & "\Creditor First Letter.docx"
+    If Dir(creditorLetterPath) <> "" Then
+        FileCopy creditorLetterPath, newFolderPath & "\Creditor First Letter.docx"
+        MsgBox "Creditor First Letter.docx copied successfully."
+    Else
+        MsgBox "Creditor First Letter.docx not found."
+    End If
+    
+    ' Change the function of Button 2 to act as a save button in the new workbook
+    Dim newButton2 As Object
+    On Error Resume Next
+    Set newButton2 = newWorkbook.Sheets("Main").Buttons("Button 2")
+    On Error GoTo 0
+    
+    If Not newButton2 Is Nothing Then
+        ' Assign a macro to Button 2
+        newButton2.OnAction = "SaveWorkbook"
+        ' Change the caption of Button 2 to "Save"
+        newButton2.Caption = "Save"
+    End If
+    
+    ' Close the current workbook without saving changes
+    ThisWorkbook.Close SaveChanges:=False
+End Sub
+
