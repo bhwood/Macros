@@ -1,4 +1,4 @@
-Sub RunMailMergeAndExportPDF()
+Sub RunSecondLetterMailMergeAndExportPDF()
     Dim WordApp As Object
     Dim WordDoc As Object
     Dim ExcelFilePath As String
@@ -21,7 +21,7 @@ Sub RunMailMergeAndExportPDF()
         ' Continue with the rest of the code
         
         ' Prompt the user to input the send date
-        sendDate = InputBox("Enter the send date of the first letter (DDMMYYYY format):", "Send Date Input")
+        sendDate = InputBox("Enter the send date of the second letter (DDMMYYYY format):", "Send Date Input")
         If sendDate = "" Then Exit Sub ' Exit if user cancels
         
         ' Format the date input with month name
@@ -30,17 +30,17 @@ Sub RunMailMergeAndExportPDF()
         ' Set up reference to the "Creditors" worksheet
         Set creditorsSheet = ThisWorkbook.Sheets("Creditors")
         
-        ' Check if there is data in column B before updating column G
+        ' Check if there is data in column B before updating column H
         Dim lastRowB As Long
         lastRowB = creditorsSheet.Cells(39, "B").End(xlUp).Row ' Ensure the check is limited to B5:B39
         If lastRowB >= 5 Then
-            ' Set the value of cells G5:G39 to the entered date with month name
+            ' Set the value of cells H5:H39 to the entered date with month name
             Dim currentRow As Long
             For currentRow = 5 To 39
                 If Not IsEmpty(creditorsSheet.Cells(currentRow, "B").Value) Then
-                    creditorsSheet.Cells(currentRow, "G").Value = sendDate
-                    creditorsSheet.Cells(currentRow, "G").NumberFormat = "DD MMMM" ' Apply date format "DD Month"
-                    creditorsSheet.Cells(currentRow, "G").HorizontalAlignment = xlCenter ' Center-align the text
+                    creditorsSheet.Cells(currentRow, "H").Value = sendDate
+                    creditorsSheet.Cells(currentRow, "H").NumberFormat = "DD MMMM" ' Apply date format "DD Month"
+                    creditorsSheet.Cells(currentRow, "H").HorizontalAlignment = xlCenter ' Center-align the text
                     ' Add more formatting as needed
                 End If
             Next currentRow
@@ -55,8 +55,8 @@ Sub RunMailMergeAndExportPDF()
         ' Construct the path to the "Master Form" Excel file
         ExcelFilePath = ExcelFilePath & "\Master Form.xlsm"
         
-        ' Specify the path to the Word template document
-        WordTemplatePath = ThisWorkbook.Path & "\Software Files\Creditor First Letter.docx"
+        ' Specify the path to the Word template document for the second letter
+        WordTemplatePath = ThisWorkbook.Path & "\Software Files\Creditor Second Letter.docx"
         
         ' Specify the path for the PDFs folder
         PDFFolderPath = ThisWorkbook.Path & "\PDFs\"
@@ -67,7 +67,7 @@ Sub RunMailMergeAndExportPDF()
         End If
         
         ' Specify the path for the single PDF with the send date
-        PDFFilePath = PDFFolderPath & "First Round Letters " & sendDate & ".pdf"
+        PDFFilePath = PDFFolderPath & "Second Round Letters " & sendDate & ".pdf"
         
         ' Create an instance of Word application
         Set WordApp = CreateObject("Word.Application")
@@ -108,26 +108,4 @@ Sub RunMailMergeAndExportPDF()
         MsgBox "Please ensure you have created the case file.", vbExclamation
     End If
 End Sub
-
-Function FormatDateForWorksheet(ByVal inputDate As String) As String
-    ' Format the date string with month name (DD Month)
-    Dim formattedDate As String
-    If Len(inputDate) = 8 Then
-        Dim dayPart As String
-        Dim monthPart As String
-        Dim yearPart As String
-        
-        dayPart = Left(inputDate, 2)
-        monthPart = Mid(inputDate, 3, 2)
-        yearPart = Right(inputDate, 4)
-        
-        formattedDate = dayPart & " " & MonthName(CInt(monthPart), True)
-    End If
-    
-    If formattedDate = "" Then
-        MsgBox "Invalid date format. Please enter the date in DDMMYYYY format.", vbExclamation
-    End If
-    
-    FormatDateForWorksheet = formattedDate
-End Function
 

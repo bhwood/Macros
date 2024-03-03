@@ -44,16 +44,26 @@ Sub CreateNewFolderAndSaveCopy()
     ' Open the newly saved workbook
     Set newWorkbook = Workbooks.Open(newWorkbookPath)
     
-    ' Copy the "Creditor First Letter.docx" to the new folder
-    creditorLetterPath = basePath & "\Creditor First Letter.docx"
+    ' Set the value of cell B20 on "Main Data" sheet to "Yes" in the new workbook
+    newWorkbook.Sheets("Main Data").Range("B20").Value = "Yes"
+    
+    ' Construct the full path for the "Software Files" subfolder within the new folder
+    Dim softwareFilesFolder As String
+    softwareFilesFolder = newFolderPath & "\Software Files\"
+    
+    ' Create the "Software Files" subfolder within the new folder
+    MkDir softwareFilesFolder
+    
+    ' Copy the "Creditor First Letter.docx" to the "Software Files" subfolder
+    creditorLetterPath = basePath & "\Software Files\Creditor First Letter.docx"
     If Dir(creditorLetterPath) <> "" Then
-        FileCopy creditorLetterPath, newFolderPath & "\Creditor First Letter.docx"
+        FileCopy creditorLetterPath, softwareFilesFolder & "Creditor First Letter.docx"
     End If
     
-    ' Copy the "Creditor Second Letter.docx" to the new folder
-    creditorSecondLetterPath = basePath & "\Creditor Second Letter.docx"
+    ' Copy the "Creditor Second Letter.docx" to the "Software Files" subfolder
+    creditorSecondLetterPath = basePath & "\Software Files\Creditor Second Letter.docx"
     If Dir(creditorSecondLetterPath) <> "" Then
-        FileCopy creditorSecondLetterPath, newFolderPath & "\Creditor Second Letter.docx"
+        FileCopy creditorSecondLetterPath, softwareFilesFolder & "Creditor Second Letter.docx"
     End If
     
     ' Show message indicating files have been copied successfully
