@@ -1,0 +1,54 @@
+Sub CheckCommas()
+    Dim rng As Range
+    Dim cell As Range
+    Dim errorFlag As Boolean
+    
+    ' Define the range to check from D5 to D39
+    Set rng = Range("D5:D39")
+    
+    ' Reset error flag
+    errorFlag = False
+    
+    ' Loop through each cell in the range
+    For Each cell In rng
+        ' Check if the corresponding cell in column B is not empty
+        If Not IsEmpty(cell.Offset(0, -2)) Then
+            ' Check if the cell is not empty and doesn't contain commas
+            If Not IsEmpty(cell) And InStr(cell.Value, ",") = 0 Then
+                ' Set error flag to true
+                errorFlag = True
+                ' Display error message with data from column A
+                MsgBox "Please check address to ensure this is correct. Suspected Error in address data for: " & Cells(cell.Row, "B").Value
+                ' Exit the loop
+                Exit For
+            End If
+        End If
+    Next cell
+    
+    ' Check for character length in cells I1:I36 only if column B is not empty
+    Dim credDataRange As Range
+    Dim i As Integer
+    Set credDataRange = ThisWorkbook.Sheets("Creditor Data").Range("I2:I36")
+    
+    ' Loop through each cell in the range I1:I36
+    For Each cell In credDataRange
+        ' Check if the corresponding cell in column B is not empty
+        If ThisWorkbook.Sheets("Creditor Data").Cells(cell.Row, "B").Value <> "" Then
+            ' Check if the cell contains between 5 and 8 characters
+            If Len(cell.Value) < 5 Or Len(cell.Value) > 8 Then
+                ' Set error flag to true
+                errorFlag = True
+                ' Display error message
+                MsgBox "Please ensure commas are in the address Postcode not displaying correctly for: " & ThisWorkbook.Sheets("Creditor Data").Cells(cell.Row, "B").Value
+                ' Exit the loop
+                Exit For
+            End If
+        End If
+    Next cell
+    
+    ' If no errors found, display success message
+    If Not errorFlag Then
+        MsgBox "Addresses look OK."
+    End If
+End Sub
+
