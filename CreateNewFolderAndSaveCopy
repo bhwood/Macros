@@ -8,6 +8,9 @@ Sub CreateNewFolderAndSaveCopy()
     Dim mainDataSheet As Worksheet
     Dim newWorkbook As Workbook
     Dim newButton2 As Object
+    Dim newButton3 As Object
+    Dim companyName As String
+    Dim contactName As String
     
     ' Error handling
     On Error GoTo ErrorHandler
@@ -18,6 +21,15 @@ Sub CreateNewFolderAndSaveCopy()
     ' Retrieve the values from cells B2 and B16
     Set mainDataSheet = ThisWorkbook.Sheets("Main Data")
     folderName = mainDataSheet.Range("B2").Value & " " & mainDataSheet.Range("B16").Value
+    
+    ' Check if Company Name (C8) and Contact Name (C30) are filled
+    companyName = Trim(mainDataSheet.Range("B2").Value)
+    contactName = Trim(mainDataSheet.Range("B16").Value)
+    
+    If companyName = "" Or contactName = "" Or companyName = "0" Or contactName = "0" Then
+        MsgBox "Incomplete Name or Company Name information. Please ensure correct information is put in before proceeding.", vbExclamation
+        Exit Sub
+    End If
     
     ' Clear previous content of B20
     mainDataSheet.Range("B20").ClearContents
@@ -72,6 +84,7 @@ Sub CreateNewFolderAndSaveCopy()
     ' Change the function of Button 2 to act as a save button in the new workbook
     On Error Resume Next
     Set newButton2 = newWorkbook.Sheets("Main").Buttons("Button 2")
+    Set newButton3 = newWorkbook.Sheets("Main").Buttons("Button 3")
     On Error GoTo 0
     
     If Not newButton2 Is Nothing Then
@@ -81,12 +94,16 @@ Sub CreateNewFolderAndSaveCopy()
         newButton2.Caption = "Save"
     End If
     
-    ' Close the current workbook without saving changes
+    If Not newButton3 Is Nothing Then
+        newButton3.Delete
+    End If
+    
+        ' Close the current workbook without saving changes
     ThisWorkbook.Close SaveChanges:=False
     
     Exit Sub
-
+    
 ErrorHandler:
-    MsgBox "An error occurred: " & Err.Description, vbExclamation
+    MsgBox "An error occurred: " & Err.Description
 End Sub
 

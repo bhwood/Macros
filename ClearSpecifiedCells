@@ -1,0 +1,25 @@
+Sub ClearSpecifiedCells()
+    Dim wsMain As Worksheet
+    Dim wsCreditors As Worksheet
+    Dim wsMainData As Worksheet
+    
+    
+    ' Set references to the Main and Creditors worksheets
+    Set wsMain = ThisWorkbook.Sheets("Main")
+    Set wsCreditors = ThisWorkbook.Sheets("Creditors")
+    Set wsMainData = ThisWorkbook.Sheets("Main Data")
+    
+    
+    ' Clear specified cells on the Main worksheet
+    wsMain.Range("C6,C8,C10,C12,C14,C16,C18,C20,C23,C30,C32,C34,E4,E6,E8,E10,E18,E20,E23,E30,E32,E34").ClearContents
+    
+    ' Clear only the text in merged cells C25 and C27
+    wsMain.Range("C25,C27").Value = ""
+    
+    ' Change the text in cell B20 on the Main worksheet to "No"
+    wsMainData.Range("B20").Value = "No"
+    
+    ' Clear data from cells B5:H39 on the Creditors worksheet
+    wsCreditors.Range("B5:H39").ClearContents
+End Sub
+
