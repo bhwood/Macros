@@ -4,7 +4,13 @@ Sub CreateNewFolderAndSaveCopy()
     Dim newFolderPath As String
     Dim newWorkbookPath As String
     Dim creditorLetterPath As String
+    Dim creditorSecondLetterPath As String
     Dim mainDataSheet As Worksheet
+    Dim newWorkbook As Workbook
+    Dim newButton2 As Object
+    
+    ' Error handling
+    On Error GoTo ErrorHandler
     
     ' Get the base path of the current workbook
     basePath = ThisWorkbook.Path
@@ -12,6 +18,9 @@ Sub CreateNewFolderAndSaveCopy()
     ' Retrieve the values from cells B2 and B16
     Set mainDataSheet = ThisWorkbook.Sheets("Main Data")
     folderName = mainDataSheet.Range("B2").Value & " " & mainDataSheet.Range("B16").Value
+    
+    ' Clear previous content of B20
+    mainDataSheet.Range("B20").ClearContents
     
     ' Set the value of cell B20 on "Main Data" sheet to "Yes"
     mainDataSheet.Range("B20").Value = "Yes"
@@ -29,24 +38,28 @@ Sub CreateNewFolderAndSaveCopy()
     End If
     
     ' Save a copy of the current workbook to the new folder with filename "Master Form"
-    newWorkbookPath = newFolderPath & "\Master Form.xlsm" '
+    newWorkbookPath = newFolderPath & "\Master Form.xlsm"
     ThisWorkbook.SaveCopyAs newWorkbookPath
     
     ' Open the newly saved workbook
-    Dim newWorkbook As Workbook
     Set newWorkbook = Workbooks.Open(newWorkbookPath)
     
     ' Copy the "Creditor First Letter.docx" to the new folder
     creditorLetterPath = basePath & "\Creditor First Letter.docx"
     If Dir(creditorLetterPath) <> "" Then
         FileCopy creditorLetterPath, newFolderPath & "\Creditor First Letter.docx"
-        MsgBox "Creditor First Letter.docx copied successfully."
-    Else
-        MsgBox "Creditor First Letter.docx not found."
     End If
     
+    ' Copy the "Creditor Second Letter.docx" to the new folder
+    creditorSecondLetterPath = basePath & "\Creditor Second Letter.docx"
+    If Dir(creditorSecondLetterPath) <> "" Then
+        FileCopy creditorSecondLetterPath, newFolderPath & "\Creditor Second Letter.docx"
+    End If
+    
+    ' Show message indicating files have been copied successfully
+    MsgBox "Creditor letters copied successfully."
+    
     ' Change the function of Button 2 to act as a save button in the new workbook
-    Dim newButton2 As Object
     On Error Resume Next
     Set newButton2 = newWorkbook.Sheets("Main").Buttons("Button 2")
     On Error GoTo 0
@@ -60,5 +73,9 @@ Sub CreateNewFolderAndSaveCopy()
     
     ' Close the current workbook without saving changes
     ThisWorkbook.Close SaveChanges:=False
-End Sub
+    
+    Exit Sub
 
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description, vbExclamation
+End Sub
