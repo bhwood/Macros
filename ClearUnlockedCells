@@ -1,0 +1,47 @@
+Sub ClearUnlockedCells()
+    Dim wsMain As Worksheet
+    Dim wsCreditors As Worksheet
+    Dim cell As Range
+    Dim mergedRange As Range
+    
+    ' Set references to the "Main" and "Creditors" sheets
+    Set wsMain = ThisWorkbook.Sheets("Main")
+    Set wsCreditors = ThisWorkbook.Sheets("Creditors")
+    
+    ' Unmerge and clear data from all unlocked cells on the "Main" sheet
+    wsMain.Unprotect ' Unprotect the sheet to clear cells
+    For Each cell In wsMain.UsedRange
+        If Not cell.Locked Then
+            ' Check if the cell is within the specified merged ranges
+            If Not Intersect(cell, wsMain.Range("C25:E25,C27:E27")) Is Nothing Then
+                ' Unmerge the cell and clear contents if it's part of the merged range
+                If cell.MergeCells Then
+                    Set mergedRange = cell.MergeArea
+                    mergedRange.UnMerge
+                    mergedRange.ClearContents
+                End If
+            Else
+                ' Clear contents if unlocked and not part of the specified merged ranges
+                cell.ClearContents
+            End If
+        End If
+    Next cell
+    
+    ' Re-merge the specified ranges on the "Main" sheet
+    wsMain.Range("C25:E25,C27:E27").Merge
+    
+    wsMain.Protect ' Protect the sheet after manipulation
+    
+    ' Clear data from all unlocked cells on the "Creditors" sheet
+    wsCreditors.Unprotect ' Unprotect the sheet to clear cells
+    For Each cell In wsCreditors.UsedRange
+        If Not cell.Locked Then
+            cell.ClearContents
+        End If
+    Next cell
+    wsCreditors.Protect ' Protect the sheet after manipulation
+    
+    ' Notify user that operation is complete
+    MsgBox "Data has been cleared from all unlocked cells on both Main and Creditors sheets, and specified ranges on the Main sheet have been unmerged and remerged.", vbInformation
+End Sub
+
