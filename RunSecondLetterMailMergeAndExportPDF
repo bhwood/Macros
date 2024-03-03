@@ -108,4 +108,3 @@ Sub RunSecondLetterMailMergeAndExportPDF()
         MsgBox "Please ensure you have created the case file.", vbExclamation
     End If
 End Sub
-

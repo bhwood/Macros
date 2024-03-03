@@ -130,4 +130,3 @@ Function FormatDateForWorksheet(ByVal inputDate As String) As String
     
     FormatDateForWorksheet = formattedDate
 End Function
-
