@@ -1,0 +1,132 @@
+Sub RunMailMergeAndExportPDF()
+    Dim WordApp As Object
+    Dim WordDoc As Object
+    Dim ExcelFilePath As String
+    Dim WordTemplatePath As String
+    Dim PDFFolderPath As String
+    Dim PDFFilePath As String
+    Dim sendDate As String
+    Dim mainDataSheet As Worksheet
+    Dim mainDataCellB20 As Range
+    Dim creditorsSheet As Worksheet
+    
+    ' Get the "Main Data" worksheet
+    Set mainDataSheet = ThisWorkbook.Sheets("Main Data")
+    
+    ' Retrieve the value from cell B20
+    Set mainDataCellB20 = mainDataSheet.Range("B20")
+    
+    ' Check if the value in cell B20 is "Yes"
+    If mainDataCellB20.Value = "Yes" Then
+        ' Continue with the rest of the code
+        
+        ' Prompt the user to input the send date
+        sendDate = InputBox("Enter the send date of the first letter (DDMMYYYY format):", "Send Date Input")
+        If sendDate = "" Then Exit Sub ' Exit if user cancels
+        
+        ' Format the date input with month name
+        sendDate = FormatDateForWorksheet(sendDate)
+        
+        ' Set up reference to the "Creditors" worksheet
+        Set creditorsSheet = ThisWorkbook.Sheets("Creditors")
+        
+        ' Check if there is data in column B before updating column G
+        Dim lastRowB As Long
+        lastRowB = creditorsSheet.Cells(39, "B").End(xlUp).Row ' Ensure the check is limited to B5:B39
+        If lastRowB >= 5 Then
+            ' Set the value of cells G5:G39 to the entered date with month name
+            Dim currentRow As Long
+            For currentRow = 5 To 39
+                If Not IsEmpty(creditorsSheet.Cells(currentRow, "B").Value) Then
+                    creditorsSheet.Cells(currentRow, "G").Value = sendDate
+                    creditorsSheet.Cells(currentRow, "G").NumberFormat = "DD MMMM" ' Apply date format "DD Month"
+                    creditorsSheet.Cells(currentRow, "G").HorizontalAlignment = xlCenter ' Center-align the text
+                    ' Add more formatting as needed
+                End If
+            Next currentRow
+        Else
+            MsgBox "No data found in column B of the 'Creditors' worksheet.", vbExclamation
+            Exit Sub
+        End If
+        
+        ' Get the path of the Excel workbook
+        ExcelFilePath = ThisWorkbook.Path
+        
+        ' Construct the path to the "Master Form" Excel file
+        ExcelFilePath = ExcelFilePath & "\Master Form.xlsm"
+        
+        ' Specify the path to the Word template document
+        WordTemplatePath = ThisWorkbook.Path & "\Creditor First Letter.docx"
+        
+        ' Specify the path for the PDFs folder
+        PDFFolderPath = ThisWorkbook.Path & "\PDFs\"
+        
+        ' Create the PDFs folder if it doesn't exist
+        If Len(Dir(PDFFolderPath, vbDirectory)) = 0 Then
+            MkDir PDFFolderPath
+        End If
+        
+        ' Specify the path for the single PDF with the send date
+        PDFFilePath = PDFFolderPath & "First Round Letters " & sendDate & ".pdf"
+        
+        ' Create an instance of Word application
+        Set WordApp = CreateObject("Word.Application")
+        
+        ' Make Word visible
+        WordApp.Visible = True
+        
+        ' Create a new document based on the Word template
+        Set WordDoc = WordApp.Documents.Add(WordTemplatePath)
+        
+        ' Update the data source path in the Word document
+        WordApp.ActiveDocument.MailMerge.MainDocumentType = wdNotAMergeDocument
+        WordApp.ActiveDocument.MailMerge.OpenDataSource Name:=ExcelFilePath, _
+            Connection:="Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=" & ExcelFilePath & ";Mode=Read;Extended Properties=""HDR=YES;IMEX=1"";", _
+            SQLStatement:="SELECT * FROM [Creditor Data$]" ' Adjusted to select data from "Creditor Data" sheet
+        WordApp.ActiveDocument.MailMerge.MainDocumentType = wdFormLetters
+        
+        ' Execute the mail merge
+        With WordDoc.MailMerge
+            .Destination = wdSendToNewDocument ' Send the output to a new document
+            .Execute Pause:=False
+        End With
+        
+        ' Save the merged document as PDF
+        WordApp.ActiveDocument.ExportAsFixedFormat OutputFileName:=PDFFilePath, ExportFormat:=17 ' wdExportFormatPDF
+        
+        ' Close the new document without saving
+        WordDoc.Close SaveChanges:=False ' Don't save changes
+        
+        ' Quit Word application
+        WordApp.Quit
+        
+        ' Release objects
+        Set WordDoc = Nothing
+        Set WordApp = Nothing
+    Else
+        ' Show error message if the value in cell B20 is not "Yes"
+        MsgBox "Please ensure you have created the case file.", vbExclamation
+    End If
+End Sub
+
+Function FormatDateForWorksheet(ByVal inputDate As String) As String
+    ' Format the date string with month name (DD Month)
+    Dim formattedDate As String
+    If Len(inputDate) = 8 Then
+        Dim dayPart As String
+        Dim monthPart As String
+        Dim yearPart As String
+        
+        dayPart = Left(inputDate, 2)
+        monthPart = Mid(inputDate, 3, 2)
+        yearPart = Right(inputDate, 4)
+        
+        formattedDate = dayPart & " " & MonthName(CInt(monthPart), True)
+    End If
+    
+    If formattedDate = "" Then
+        MsgBox "Invalid date format. Please enter the date in DDMMYYYY format.", vbExclamation
+    End If
+    
+    FormatDateForWorksheet = formattedDate
+End Function
