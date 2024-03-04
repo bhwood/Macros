@@ -58,16 +58,14 @@ Sub RunMailMergeAndExportPDF()
         ' Specify the path to the Word template document
         WordTemplatePath = ThisWorkbook.Path & "\Software Files\Creditor First Letter.docx"
         
-        ' Specify the path for the PDFs folder
+        ' Specify the path for the single PDF with the send date
         PDFFolderPath = ThisWorkbook.Path & "\PDFs\"
+        PDFFilePath = PDFFolderPath & "First Round Letters " & sendDate & ".pdf"
         
         ' Create the PDFs folder if it doesn't exist
         If Len(Dir(PDFFolderPath, vbDirectory)) = 0 Then
             MkDir PDFFolderPath
         End If
-        
-        ' Specify the path for the single PDF with the send date
-        PDFFilePath = PDFFolderPath & "First Round Letters " & sendDate & ".pdf"
         
         ' Create an instance of Word application
         Set WordApp = CreateObject("Word.Application")
@@ -90,6 +88,13 @@ Sub RunMailMergeAndExportPDF()
             .Destination = wdSendToNewDocument ' Send the output to a new document
             .Execute Pause:=False
         End With
+        
+        ' Specify the path for saving the Word document
+        Dim WordFilePath As String
+        WordFilePath = PDFFolderPath & "\First Round Letters " & sendDate & ".docx"
+        
+        ' Save the Word document
+        WordApp.ActiveDocument.SaveAs2 FileName:=WordFilePath
         
         ' Save the merged document as PDF
         WordApp.ActiveDocument.ExportAsFixedFormat OutputFileName:=PDFFilePath, ExportFormat:=17 ' wdExportFormatPDF
